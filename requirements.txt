@@ -1,0 +1,11 @@
+﻿anthropic>=0.25.0
+elevenlabs>=1.0.0
+pvporcupine>=3.0.0
+pvrecorder>=1.2.0
+SpeechRecognition>=3.10.0
+pyaudio>=0.2.14
+pygame>=2.5.0
+python-dotenv>=1.0.0
+pyttsx3>=2.90
+ddgs>=9.13.0
+edge-tts>=6.1.12
