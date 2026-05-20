@@ -54,6 +54,7 @@ SILENCE_TIMEOUT = 5
 PHRASE_LIMIT = 10
 WAKE_SIGNAL_PHRASE_LIMIT = 4
 CLAP_DETECTION_ENABLED = os.getenv("CLAP_DETECTION_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
+CLAP_TRIGGER_COUNT = max(2, int(os.getenv("CLAP_TRIGGER_COUNT", "3")))
 CLAP_MIN_PEAK = int(os.getenv("CLAP_MIN_PEAK", "7000"))
 CLAP_ENERGY_RATIO = float(os.getenv("CLAP_ENERGY_RATIO", "4.0"))
 CLAP_MIN_GAP_SECONDS = float(os.getenv("CLAP_MIN_GAP_SECONDS", "0.12"))

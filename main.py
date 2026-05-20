@@ -21,6 +21,7 @@ from brain import think
 from config import (
     ANTHROPIC_KEY,
     CLAP_DETECTION_ENABLED,
+    CLAP_TRIGGER_COUNT,
     ENABLE_HUD,
     ELEVENLABS_KEY,
     ELEVENLABS_VOICE,
@@ -294,7 +295,7 @@ def main() -> None:
                         session_awake = time.monotonic() < direct_awake_until
                         if REQUIRE_WAKE_PREFIX and not session_awake:
                             if CLAP_DETECTION_ENABLED:
-                                _log("[SLEEPING] Waiting for wake signal: double clap or 'Hey Jarvis'...")
+                                _log(f"[SLEEPING] Waiting for wake signal: {CLAP_TRIGGER_COUNT} claps or 'Hey Jarvis'...")
                             else:
                                 _log("[SLEEPING] Waiting for wake phrase: 'Hey Jarvis'...")
                         else:

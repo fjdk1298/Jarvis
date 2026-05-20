@@ -30,7 +30,7 @@ Coordinates the entire runtime:
 Handles microphone-facing logic:
 
 - speech recognition input
-- clap detection
+- clap-pattern detection
 - wake signal recognition
 - barge-in interruption detection
 
@@ -56,7 +56,7 @@ Handles output audio:
 
 Runs as a hidden background process after Windows sign-in:
 
-- listens for double-clap
+- listens for a configured clap pattern
 - launches the main Jarvis app
 - avoids duplicate launches
 
@@ -77,7 +77,7 @@ The repo is intentionally tuned for free and repeatable use:
 ### Clap launch mode
 
 - Background listener starts with Windows
-- Double-clap launches Jarvis
+- The default public setup uses a 3-clap trigger to reduce accidental launches
 
 ### Direct speech wake mode
 

@@ -21,6 +21,7 @@ from config import (
     CLAP_MAX_GAP_SECONDS,
     CLAP_MIN_GAP_SECONDS,
     CLAP_MIN_PEAK,
+    CLAP_TRIGGER_COUNT,
     WAKE_SIGNAL_PHRASE_LIMIT,
 )
 
@@ -31,7 +32,7 @@ class MicrophoneError(Exception):
 
 @dataclass
 class WakeSignal:
-    """Represent a successful wake trigger from speech or a double clap."""
+    """Represent a successful wake trigger from speech or a clap pattern."""
 
     kind: str
     text: str | None = None
@@ -205,8 +206,8 @@ def _median(values: list[int]) -> int:
     return ordered[len(ordered) // 2]
 
 
-def _is_double_clap(audio: sr.AudioData) -> bool:
-    """Detect a local double-clap pattern from raw microphone audio."""
+def _matches_clap_pattern(audio: sr.AudioData, required_claps: int) -> bool:
+    """Detect a local clap sequence with the required number of short bursts."""
     if not CLAP_DETECTION_ENABLED:
         return False
 
@@ -260,24 +261,42 @@ def _is_double_clap(audio: sr.AudioData) -> bool:
         for burst_start, burst_end, peak in bursts
         if (burst_end - burst_start) <= CLAP_MAX_BURST_SECONDS
     ]
-    if len(short_bursts) < 2:
+    if len(short_bursts) < required_claps:
         return False
 
-    for first_index in range(len(short_bursts) - 1):
-        first_time, first_peak = short_bursts[first_index]
-        for second_time, second_peak in short_bursts[first_index + 1 :]:
-            gap = second_time - first_time
-            if CLAP_MIN_GAP_SECONDS <= gap <= CLAP_MAX_GAP_SECONDS:
-                if first_peak >= threshold and second_peak >= threshold:
-                    return True
-            if gap > CLAP_MAX_GAP_SECONDS:
+    for start_index in range(0, len(short_bursts) - required_claps + 1):
+        sequence = short_bursts[start_index : start_index + required_claps]
+        valid_sequence = True
+
+        for clap_index in range(required_claps - 1):
+            current_time, current_peak = sequence[clap_index]
+            next_time, _next_peak = sequence[clap_index + 1]
+            gap = next_time - current_time
+
+            if current_peak < threshold:
+                valid_sequence = False
                 break
+            if not (CLAP_MIN_GAP_SECONDS <= gap <= CLAP_MAX_GAP_SECONDS):
+                valid_sequence = False
+                break
+
+        if valid_sequence and sequence[-1][1] >= threshold:
+            return True
 
     return False
 
 
+def _format_clap_label(required_claps: int) -> str:
+    """Return a human-readable label for the configured clap trigger count."""
+    if required_claps == 2:
+        return "double clap"
+    if required_claps == 3:
+        return "triple clap"
+    return f"{required_claps}-clap pattern"
+
+
 def listen_for_wake_signal(silence_timeout: int, phrase_limit: int) -> WakeSignal | None:
-    """Wait for either a wake phrase or a double-clap and report the trigger."""
+    """Wait for either a wake phrase or the configured clap pattern and report the trigger."""
     recognizer = sr.Recognizer()
     listen_limit = min(max(1, phrase_limit), WAKE_SIGNAL_PHRASE_LIMIT)
 
@@ -290,7 +309,7 @@ def listen_for_wake_signal(silence_timeout: int, phrase_limit: int) -> WakeSigna
                 phrase_time_limit=listen_limit,
             )
     except sr.WaitTimeoutError:
-        print("[INFO] Wake listening timed out with no speech or clap.")
+        print("[INFO] Wake listening timed out with no speech or clap trigger.")
         return None
     except OSError as exc:
         raise MicrophoneError(str(exc)) from exc
@@ -298,8 +317,8 @@ def listen_for_wake_signal(silence_timeout: int, phrase_limit: int) -> WakeSigna
         print(f"[ERROR] Wake capture failed: {exc}")
         return None
 
-    if _is_double_clap(audio):
-        print("[WAKE] Double clap detected!")
+    if _matches_clap_pattern(audio, CLAP_TRIGGER_COUNT):
+        print(f"[WAKE] {_format_clap_label(CLAP_TRIGGER_COUNT).title()} detected!")
         return WakeSignal(kind="clap")
 
     try:
@@ -316,11 +335,12 @@ def listen_for_wake_signal(silence_timeout: int, phrase_limit: int) -> WakeSigna
         return None
 
 
-def listen_for_double_clap(silence_timeout: int, phrase_limit: int) -> bool:
-    """Listen locally for one double-clap wake attempt without using cloud STT."""
+def listen_for_clap_trigger(silence_timeout: int, phrase_limit: int, required_claps: int | None = None) -> bool:
+    """Listen locally for one clap-pattern wake attempt without using cloud STT."""
     if not CLAP_DETECTION_ENABLED:
         return False
 
+    trigger_count = required_claps or CLAP_TRIGGER_COUNT
     recognizer = sr.Recognizer()
     listen_limit = min(max(1, phrase_limit), WAKE_SIGNAL_PHRASE_LIMIT)
 
@@ -337,11 +357,11 @@ def listen_for_double_clap(silence_timeout: int, phrase_limit: int) -> bool:
     except OSError as exc:
         raise MicrophoneError(str(exc)) from exc
     except Exception as exc:
-        print(f"[ERROR] Double-clap capture failed: {exc}")
+        print(f"[ERROR] Clap trigger capture failed: {exc}")
         return False
 
-    if _is_double_clap(audio):
-        print("[WAKE] Double clap detected!")
+    if _matches_clap_pattern(audio, trigger_count):
+        print(f"[WAKE] {_format_clap_label(trigger_count).title()} detected!")
         return True
 
     return False

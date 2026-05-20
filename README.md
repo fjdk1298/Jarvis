@@ -4,7 +4,7 @@ Jarvis is a Windows-first, voice-first desktop assistant designed to feel alive.
 
 This build focuses on a low-friction local setup:
 
-- Double-clap can launch Jarvis from the background after Windows sign-in.
+- A 3-clap trigger can launch Jarvis from the background after Windows sign-in.
 - `Hey Jarvis` wakes the active session.
 - Local Ollama can handle conversation without cloud credits.
 - Edge TTS can speak back for free without ElevenLabs.
@@ -18,7 +18,7 @@ This version is designed around:
 
 - A strong local-first setup
 - Fast wake and response flow
-- Double-clap launch after Windows sign-in
+- A safer 3-clap launch after Windows sign-in
 - A simple install path for non-developers
 
 ## Documentation
@@ -30,7 +30,7 @@ This version is designed around:
 ## What This Version Can Do
 
 - Listen for a wake phrase and keep the session open
-- Launch from a double clap through a hidden Windows startup listener
+- Launch from a 3-clap trigger through a hidden Windows startup listener
 - Talk back with offline speech
 - Use local Ollama when cloud credits are unavailable
 - Open apps, open sites, search Google, and search YouTube
@@ -76,6 +76,7 @@ LOCAL_ONLY_MODE=true
 LOCAL_LLM_FALLBACK=true
 FORCE_OFFLINE_TTS=true
 CLAP_DETECTION_ENABLED=true
+CLAP_TRIGGER_COUNT=3
 REQUIRE_WAKE_PREFIX=true
 OLLAMA_MODEL=llama3.2:3b-instruct
 ```
@@ -92,7 +93,7 @@ OLLAMA_MODEL=llama3.2:3b-instruct
 .\start_jarvis.ps1
 ```
 
-After that, sign into Windows and double-clap to launch him from the background.
+After that, sign into Windows and clap 3 times to launch him from the background.
 
 ## Local vs Cloud Modes
 
@@ -156,7 +157,7 @@ PICOVOICE_ACCESS_KEY=your_key_here
 ### Typical voice flow
 
 1. Sign into Windows.
-2. Double-clap to launch Jarvis.
+2. Clap 3 times to launch Jarvis.
 3. Say `Hey Jarvis`.
 4. Speak normally after he wakes.
 5. Say `go to sleep` if you want him back in standby.
@@ -184,7 +185,7 @@ PICOVOICE_ACCESS_KEY=your_key_here
 OFFLINE_TTS_ENGINE=powershell
 ```
 
-### Double-clap does not open Jarvis
+### 3-clap launch does not open Jarvis
 
 - Re-run:
 
@@ -194,6 +195,7 @@ OFFLINE_TTS_ENGINE=powershell
 
 - Sign out and back into Windows once so Startup entries refresh.
 - Make sure `CLAP_DETECTION_ENABLED=true` in `.env`.
+- Make sure `CLAP_TRIGGER_COUNT=3` in `.env`.
 - Avoid very noisy rooms when testing.
 
 ### Jarvis says the local model is unavailable
@@ -219,10 +221,10 @@ ollama list
 ## Project Files
 
 - `main.py` orchestrates the voice loop
-- `listen.py` handles mic capture, clap detection, and STT
+- `listen.py` handles mic capture, clap-pattern detection, and STT
 - `brain.py` handles LLM replies and streaming text
 - `speak.py` handles voice output and sound playback
-- `launcher.py` is the hidden clap-to-open background process
+- `launcher.py` is the hidden clap-trigger background process
 - `install_autostart.py` installs or removes the Windows Startup entry
 
 ## Security Notes

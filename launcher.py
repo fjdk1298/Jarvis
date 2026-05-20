@@ -1,6 +1,6 @@
 """Background launcher for clap-to-open Jarvis on Windows.
 
-This module starts at Windows login, listens for a local double clap,
+This module starts at Windows login, listens for a local multi-clap trigger,
 and launches the full Jarvis app without requiring a terminal.
 """
 
@@ -11,8 +11,8 @@ import subprocess
 import time
 from pathlib import Path
 
-from config import CLAP_DETECTION_ENABLED, PHRASE_LIMIT, SILENCE_TIMEOUT
-from listen import MicrophoneError, listen_for_double_clap
+from config import CLAP_DETECTION_ENABLED, CLAP_TRIGGER_COUNT, PHRASE_LIMIT, SILENCE_TIMEOUT
+from listen import MicrophoneError, listen_for_clap_trigger
 from runtime import JARVIS_LAUNCHER_MUTEX_NAME, SingleInstanceMutex, is_jarvis_running
 
 _BASE_DIR = Path(__file__).resolve().parent
@@ -59,7 +59,7 @@ def _launch_jarvis() -> bool:
             stdin=subprocess.DEVNULL,
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
-        _log("Launched Jarvis after double clap.")
+        _log(f"Launched Jarvis after {CLAP_TRIGGER_COUNT} clap trigger.")
         return True
     except Exception as exc:
         _log(f"Failed to launch Jarvis: {exc}")
@@ -91,7 +91,7 @@ def main() -> None:
                 continue
 
             try:
-                if listen_for_double_clap(SILENCE_TIMEOUT, PHRASE_LIMIT):
+                if listen_for_clap_trigger(SILENCE_TIMEOUT, PHRASE_LIMIT, CLAP_TRIGGER_COUNT):
                     if not is_jarvis_running() and _launch_jarvis():
                         cooldown_until = time.monotonic() + _LAUNCH_COOLDOWN_SECONDS
                     else:

@@ -59,6 +59,7 @@ LOCAL_ONLY_MODE=true
 LOCAL_LLM_FALLBACK=true
 FORCE_OFFLINE_TTS=true
 CLAP_DETECTION_ENABLED=true
+CLAP_TRIGGER_COUNT=3
 REQUIRE_WAKE_PREFIX=true
 OLLAMA_MODEL=llama3.2:3b-instruct
 ```
@@ -82,7 +83,7 @@ After that, future sessions can use the clap launcher after Windows sign-in.
 ## 8. Test the Expected Flow
 
 1. Sign into Windows.
-2. Double-clap.
+2. Clap 3 times.
 3. Wait for Jarvis to appear.
 4. Say `Hey Jarvis`.
 5. Ask something simple like `what year is it`.
@@ -112,7 +113,7 @@ ollama list
 .\.venv\Scripts\python.exe .\main.py
 ```
 
-If clap launch is not responding:
+If the 3-clap launch is not responding:
 
 ```powershell
 .\disable_clap_autostart.ps1
