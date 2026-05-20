@@ -10,6 +10,23 @@ This build focuses on a low-friction local setup:
 - Edge TTS can speak back for free without ElevenLabs.
 - The HUD shows status, logs, and typed commands.
 
+## Why This Repo Exists
+
+The goal is simple: make Jarvis feel present on a real Windows PC without requiring paid credits just to use him day to day.
+
+This version is designed around:
+
+- A strong local-first setup
+- Fast wake and response flow
+- Double-clap launch after Windows sign-in
+- A simple install path for non-developers
+
+## Documentation
+
+- [Installation Guide](docs/INSTALLATION.md)
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [Command Examples](docs/COMMANDS.md)
+
 ## What This Version Can Do
 
 - Listen for a wake phrase and keep the session open
@@ -76,6 +93,24 @@ OLLAMA_MODEL=llama3.2:3b-instruct
 ```
 
 After that, sign into Windows and double-clap to launch him from the background.
+
+## Local vs Cloud Modes
+
+### Local-first mode
+
+Best if you want zero recurring API cost.
+
+- Uses Ollama for the model
+- Uses offline TTS by default
+- Keeps clap launch and HUD working locally
+
+### Cloud-enhanced mode
+
+Best if you want stronger model quality or premium voice output.
+
+- Anthropic or OpenRouter for the LLM
+- ElevenLabs for premium voice output
+- Picovoice for dedicated Porcupine wake-word support
 
 ## Optional Cloud Setup
 
